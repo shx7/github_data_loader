@@ -14,13 +14,14 @@ public class OrganizationLoaderService extends DataLoaderService<Organization> {
     public void loadData(int startId, int endId) {
 
     }
-}
 
-class OrganizationLoader extends DataLoader<Organization> {
+    private static class OrganizationLoader extends DataLoader<Organization> {
 
-    @NotNull
-    @Override
-    protected Organization load(int id) {
-        return null;
+        @NotNull
+        @Override
+        protected Organization load(int id) {
+            return null;
+        }
     }
+
 }

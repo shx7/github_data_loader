@@ -14,13 +14,13 @@ public class RepositoryLoaderService extends DataLoaderService<Repository> {
     public void loadData(int startId, int endId) {
 
     }
-}
 
-class RepositoryLoader extends DataLoader<Repository> {
+    private static class RepositoryLoader extends DataLoader<Repository> {
 
-    @NotNull
-    @Override
-    protected Repository load(int id) {
-        return null;
+        @NotNull
+        @Override
+        protected Repository load(int id) {
+            return null;
+        }
     }
 }

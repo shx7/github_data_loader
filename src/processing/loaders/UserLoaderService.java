@@ -14,12 +14,12 @@ public class UserLoaderService extends DataLoaderService<User> {
     public void loadData(int startId, int endId) {
         // TODO: load all users with dependencies
     }
-}
 
-class UserLoader extends DataLoader<User> {
-    @NotNull
-    @Override
-    protected User load(int id) {
-        return null;
+    private static class UserLoader extends DataLoader<User> {
+        @NotNull
+        @Override
+        protected User load(int id) {
+            return null;
+        }
     }
 }
