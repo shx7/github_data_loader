@@ -1,4 +1,4 @@
-package data.exceptions;
+package processing.exceptions;
 
 public class RequestsLimitExceededException extends DataLoadingException {
 }
