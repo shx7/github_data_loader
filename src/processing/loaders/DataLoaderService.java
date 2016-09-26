@@ -5,14 +5,23 @@ import java.util.function.Consumer;
 
 public abstract class DataLoaderService <T> {
     @NotNull
-    private final Consumer<T> dataProcessor;
+    protected final Consumer<T> dataProcessor;
     @NotNull
-    private final DataLoader dataLoader;
+    protected final DataLoader<T> dataLoader;
 
-    public DataLoaderService(@NotNull Consumer<T> dataProcessor, @NotNull DataLoader dataLoader) {
+    public DataLoaderService(@NotNull Consumer<T> dataProcessor, @NotNull DataLoader<T> dataLoader) {
         this.dataProcessor = dataProcessor;
         this.dataLoader = dataLoader;
     }
 
-    public abstract void loadData(int startId, int endId);
+    public void loadData(int startId, int endId) {
+        try {
+            for (int id = startId; id <= endId; ++id) {
+                T data = dataLoader.load(id);
+                dataProcessor.accept(data);
+            }
+        } catch (Exception ignored) {
+            // TODO: handle exceptions
+        }
+    }
 }

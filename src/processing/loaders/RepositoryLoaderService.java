@@ -10,13 +10,7 @@ public class RepositoryLoaderService extends DataLoaderService<Repository> {
         super(dataProcessor, new RepositoryLoader());
     }
 
-    @Override
-    public void loadData(int startId, int endId) {
-
-    }
-
     private static class RepositoryLoader extends DataLoader<Repository> {
-
         @NotNull
         @Override
         protected Repository load(int id) {

@@ -10,18 +10,11 @@ public class OrganizationLoaderService extends DataLoaderService<Organization> {
         super(dataProcessor, new OrganizationLoader());
     }
 
-    @Override
-    public void loadData(int startId, int endId) {
-
-    }
-
     private static class OrganizationLoader extends DataLoader<Organization> {
-
         @NotNull
         @Override
         protected Organization load(int id) {
             return null;
         }
     }
-
 }
