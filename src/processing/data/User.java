@@ -3,7 +3,8 @@ package processing.data;
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
 
-public class User {
+// TODO: complete definition corresponds to github api
+public class User implements Data {
     @NotNull String login;
     int id;
     @NotNull String avatarUrl;
