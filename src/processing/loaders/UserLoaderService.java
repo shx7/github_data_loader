@@ -1,19 +1,19 @@
 package processing.loaders;
 
+import com.google.gson.Gson;
 import com.sun.istack.internal.NotNull;
 import processing.data.User;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.IntStream;
 
 public class UserLoaderService extends DataLoaderService<User> {
     @NotNull private final Deque<Integer> usersToProcess;
@@ -27,33 +27,27 @@ public class UserLoaderService extends DataLoaderService<User> {
 
     @Override
     public void loadData(int startId, int endId) {
-        IntStream.range(startId, endId).forEach(usersToProcess::add);
         try {
-            while (!usersToProcess.isEmpty()) {
-                int id = usersToProcess.pop();
-                if (!processedUsers.contains(id)) {
-                    User user = dataLoader.load(id);
+            for (int id = startId; id <= endId; ) {
+                User[] users = dataLoader.loadPage(id);
+                for (User user : users) {
                     dataProcessor.accept(user);
-                    processUserDependecies(user);
                 }
+                id += users.length;
             }
         } catch (Exception ignored) {
         }
     }
 
-    private void processUserDependecies(User user) {
-        // TODO: for id in user.neighbours do process
-    }
-
     private static class UserLoader extends DataLoader<User> {
-        @NotNull private final String requestURL = "http://api.github.com/";
+        @NotNull private final String requestURL = "https://api.github.com/users/";
         @NotNull private final String requestType = "GET";
 
         @Override
-        protected User load(int id) {
+        protected User[] loadPage(int id) {
             try {
                 URL url = new URL(createRequestUrl(id));
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 connection.setRequestMethod(requestType);
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
                     String readLine;
@@ -61,11 +55,10 @@ public class UserLoaderService extends DataLoaderService<User> {
                     while ((readLine = reader.readLine()) != null) {
                         result = result.append(readLine);
                     }
-                    System.out.println("Read answer for id " + id + "'" + result + "'");
+                    System.out.println("Read answer for id " + id + "\"" + result + "\"");
+                    return new Gson().fromJson(result.toString(), User[].class);
                 }
-                // TODO: parse JSON here
-                return new User();
-            } catch (IOException e) {
+            } catch (IOException | RuntimeException e) {
                 e.printStackTrace();
             }
             return null;
@@ -73,7 +66,7 @@ public class UserLoaderService extends DataLoaderService<User> {
 
         @NotNull
         String createRequestUrl(int id) {
-            return requestURL + "/user=id";
+            return requestURL + "shx7";
         }
     }
 }

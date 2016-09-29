@@ -11,5 +11,12 @@ import processing.data.Data;
  */
 abstract class DataLoader <T extends Data> {
     @NotNull
-    protected abstract T load(int id);
+    protected T load(int id) {
+        return null;
+    }
+
+    @NotNull
+    protected T[] loadPage(int startIndex) {
+        return null;
+    }
 }
