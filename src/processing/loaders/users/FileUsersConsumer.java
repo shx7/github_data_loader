@@ -54,8 +54,8 @@ public class FileUsersConsumer implements Consumer<User> {
             PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path));
             data.forEach(user -> writer.write(user.toString()));
             data.clear();
+            log.log(Level.INFO, "Flushed " + count + " users from " + startId + " to " + endId);
             count = 0;
-            log.log(Level.INFO, "Flush users from " + startId + " to " + endId);
             startId = endId = -1;
         }
     }
