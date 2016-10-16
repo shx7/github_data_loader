@@ -3,6 +3,7 @@ package processing.loaders.common;
 import com.sun.istack.internal.NotNull;
 import processing.data.Data;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -18,7 +19,7 @@ public abstract class DataLoader <T extends Data> {
     }
 
     @NotNull
-    public List<T> loadPage(int startIndex) {
+    public List<T> loadPage(int startIndex) throws IOException {
         return null;
     }
 }

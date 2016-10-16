@@ -33,12 +33,15 @@ public class UserLoaderService extends DataLoaderService<User> {
     @Override
     public void loadData(int startId, int endId) {
         for (int id = startId; id <= endId; ) {
-            List<User> users = dataLoader.loadPage(id);
-            if (users != null) {
+            try {
+                List<User> users = dataLoader.loadPage(id);
                 users.forEach(dataProcessor);
                 id = users.get(users.size() - 1).getId();
-            } else {
+            } catch (IOException e) {
                 log.log(Level.WARNING, "Failed to get users from page since id = " + id);
+                log.log(Level.SEVERE, e.getLocalizedMessage());
+                log.log(Level.SEVERE, e.getMessage());
+                log.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             }
         }
     }
@@ -60,33 +63,24 @@ class UserLoader extends DataLoader<User> {
      * Load pack of users data, starting from @id.
      * Size of page approximately about 45 users
      */
-    @Nullable
+    @NotNull
     @Override
-    public List<User> loadPage(int id) {
-        try {
-            List<User> result = new ArrayList<>();
-            User[] prefetchedUsers = loadData(User[].class, buildUsersPageRequestUrl(id));
-            if (prefetchedUsers != null) {
-                for (User user : prefetchedUsers) {
-                    result.add(loadData(User.class, buildUserRequestUrl(user.getLogin())));
-                }
+    public List<User> loadPage(int id) throws IOException {
+        List<User> result = new ArrayList<>();
+        User[] prefetchedUsers = loadData(User[].class, buildUsersPageRequestUrl(id));
+        if (prefetchedUsers != null) {
+            for (User user : prefetchedUsers) {
+                result.add(loadData(User.class, buildUserRequestUrl(user.getLogin())));
             }
-            return result;
-        } catch (Throwable e) {
-            log.log(Level.SEVERE, "Error occured: " + e);
         }
-        return null;
+        return result;
     }
 
     @Nullable
-    private <T> T loadData(@NotNull Class<T> type, @NotNull String request) throws Throwable {
+    private <T> T loadData(@NotNull Class<T> type, @NotNull String request) throws IOException {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(getConnectionDataStream(request)))) {
             return gson.fromJson(reader.lines().collect(Collectors.joining()), type);
-        } catch (Throwable e) {
-            e.printStackTrace();
-            log.log(Level.SEVERE, e.getMessage(), e.getLocalizedMessage());
-            throw e;
         }
     }
 
