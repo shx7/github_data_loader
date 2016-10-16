@@ -28,10 +28,10 @@ public class FileUsersConsumer implements Consumer<User> {
 
     @Override
     public void accept(User user) {
-        if (startId == -1) {
-            startId = user.getId();
-        }
         endId = user.getId();
+        if (startId < 0) {
+            startId = endId;
+        }
         data.add(user);
         ++count;
         checkThreshold();
@@ -48,11 +48,13 @@ public class FileUsersConsumer implements Consumer<User> {
     }
 
     public void flush() throws IOException {
-        Path path = FileUtil.getUsersFile(startId, endId);
-        PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path));
-        data.forEach(user -> writer.write(user.toString()));
-        startId = endId;
-        count = 0;
-        data.clear();
+        if (startId > 0) {
+            Path path = FileUtil.getUsersFile(startId, endId);
+            PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path));
+            data.forEach(user -> writer.write(user.toString()));
+            startId = endId = -1;
+            count = 0;
+            data.clear();
+        }
     }
 }
