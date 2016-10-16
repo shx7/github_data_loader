@@ -3,6 +3,7 @@ package processing.loaders;
 import com.google.gson.Gson;
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
+import oauth.OAuthCredentialsProvider;
 import processing.data.User;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -20,8 +21,9 @@ import java.util.logging.Logger;
 public class UserLoaderService extends DataLoaderService<User> {
     private static final Logger log = Logger.getLogger(UserLoaderService.class.getCanonicalName());
 
-    public UserLoaderService(@NotNull Consumer<User> dataProcessor) {
-        super(dataProcessor, new UserLoader());
+    public UserLoaderService(@NotNull Consumer<User> dataProcessor,
+                             @NotNull OAuthCredentialsProvider credentialsProvider) {
+        super(dataProcessor, new UserLoader(credentialsProvider));
     }
 
     @Override
@@ -43,6 +45,11 @@ public class UserLoaderService extends DataLoaderService<User> {
         @NotNull private final String GITHUB_DEFAULT_URL = "https://api.github.com";
         @NotNull private String defaultRequestUrl = GITHUB_DEFAULT_URL + "/users";
         @NotNull private final Gson gson = new Gson();
+        @NotNull private final OAuthCredentialsProvider credentialsProvider;
+
+        UserLoader(OAuthCredentialsProvider credentialsProvider) {
+            this.credentialsProvider = credentialsProvider;
+        }
 
         /**
          * Load pack of users data, starting from @id.
@@ -75,7 +82,7 @@ public class UserLoaderService extends DataLoaderService<User> {
             Map<String, List<String>> headerFields = null;
 
             while (!isRequestSucceded(headerFields)) {
-                URL url = new URL(currentRequestUrl + "?since=" + id);
+                URL url = new URL(buildRequestUrl(currentRequestUrl, id));
                 connection = (HttpsURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 headerFields = connection.getHeaderFields();
@@ -83,6 +90,13 @@ public class UserLoaderService extends DataLoaderService<User> {
             }
 
             return connection.getInputStream();
+        }
+
+        @NotNull
+        private String buildRequestUrl(@NotNull String requestUrl, int id) {
+            return requestUrl + "?since=" + id +
+                    "&client_id=" + credentialsProvider.getClientId() +
+                    "&client_secret=" + credentialsProvider.getClientSecret();
         }
 
         private boolean isRequestSucceded(@Nullable Map<String, List<String>> responseHeaders) {
@@ -100,7 +114,7 @@ public class UserLoaderService extends DataLoaderService<User> {
                                             @NotNull String oldRequestUrl) {
             List<String> redirectionUrl = headersFields.get("Location");
             if (redirectionUrl != null) {
-                return redirectionUrl.get(0);
+                return redirectionUrl.get(0) + "/users";
             }
             return oldRequestUrl;
         }
