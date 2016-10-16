@@ -42,6 +42,7 @@ public class FileUsersConsumer implements Consumer<User> {
             try {
                 flush();
             } catch (IOException e) {
+                log.log(Level.WARNING, "Failed to flush: " + e.getMessage());
                 log.log(Level.WARNING, e.getLocalizedMessage());
             }
         }
@@ -52,9 +53,10 @@ public class FileUsersConsumer implements Consumer<User> {
             Path path = FileUtil.getUsersFile(startId, endId);
             PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path));
             data.forEach(user -> writer.write(user.toString()));
-            startId = endId = -1;
-            count = 0;
             data.clear();
+            count = 0;
+            log.log(Level.INFO, "Flush users from " + startId + " to " + endId);
+            startId = endId = -1;
         }
     }
 }
