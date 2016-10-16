@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -45,7 +47,7 @@ public class UserLoaderService extends DataLoaderService<User> {
 class UserLoader extends DataLoader<User> {
     @NotNull private final static Logger log = Logger.getLogger(UserLoader.class.getCanonicalName());
     @NotNull private final String GITHUB_DEFAULT_URL = "https://api.github.com";
-    @NotNull private String defaultRequestUrl = GITHUB_DEFAULT_URL;
+    @NotNull private String globalRequestUrl = GITHUB_DEFAULT_URL;
     @NotNull private final Gson gson;
     @NotNull private final OAuthCredentialsProvider credentialsProvider;
 
@@ -85,7 +87,7 @@ class UserLoader extends DataLoader<User> {
 
     @NotNull
     private InputStream getConnectionDataStream(@NotNull String request) throws IOException {
-        String currentRequestUrl = defaultRequestUrl;
+        String currentRequestUrl = globalRequestUrl;
         HttpsURLConnection connection = null;
         Map<String, List<String>> headerFields;
 
@@ -94,7 +96,24 @@ class UserLoader extends DataLoader<User> {
             connection = (HttpsURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             headerFields = connection.getHeaderFields();
-            currentRequestUrl = getUpdatedRequestUrl(headerFields, currentRequestUrl);
+
+            // Handle error codes
+            switch (connection.getResponseCode()) {
+                case 403:
+                    processRateLimit(headerFields);
+                    break;
+                case 404:
+                    log.log(Level.SEVERE, "404 Not found");
+                    break;
+                case 301:
+                    globalRequestUrl = getUpdatedRequestUrl(headerFields, globalRequestUrl);
+                    currentRequestUrl = globalRequestUrl;
+                    break;
+                case 302:
+                case 307:
+                    currentRequestUrl = getUpdatedRequestUrl(headerFields, currentRequestUrl);
+                    break;
+            }
         }
         return connection.getInputStream();
     }
@@ -121,5 +140,26 @@ class UserLoader extends DataLoader<User> {
             return redirectionUrl.get(0);
         }
         return oldRequestUrl;
+    }
+
+    private void processRateLimit(@NotNull Map<String, List<String>> headers) {
+        List<String> rateLimitRemaining = headers.get("X-RateLimit-Remaining");
+        if (rateLimitRemaining != null) {
+            long secondsToReset = Long.valueOf(rateLimitRemaining.get(0));
+            if (secondsToReset == 0) {
+                log.log(Level.WARNING, "Rate limit ended, current time " + LocalDateTime.now());
+                log.log(Level.WARNING, "Will wait until " + LocalDateTime.ofEpochSecond(secondsToReset, 0, ZoneOffset.UTC));
+                sleepUntilReset(secondsToReset);
+            }
+        }
+    }
+
+    private void sleepUntilReset(long secondsToReset) {
+        while (LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(0)) <= secondsToReset) {
+            long secondsToWait = secondsToReset - LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(0));
+            try {
+                Thread.sleep(secondsToWait * 1000);
+            } catch (InterruptedException ignored) {}
+        }
     }
 }
