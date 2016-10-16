@@ -1,5 +1,6 @@
 package processing.data;
 
+import com.google.gson.Gson;
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
 
@@ -32,18 +33,18 @@ public class User implements Data {
     private @NotNull String email;
     private @NotNull String hireable;
     private @NotNull String bio;
-    private int publicRepos;
-    private @NotNull String publicGists;
+    private int public_repos;
+    private @NotNull String public_gists;
     private int followers;
     private int following;
-    private @NotNull String createdAt;
-    private @NotNull String updatedAt;
+    private @NotNull String created_at;
+    private @NotNull String updated_at;
 
     // Authentificated area
-    private @Nullable Integer totalPrivateRepos;
-    private @Nullable Integer ownedPrivateRepos;
-    private @Nullable Integer privateGists;
-    private @Nullable Integer diskUsage;
+    private @Nullable Integer total_private_repos;
+    private @Nullable Integer owned_private_repos;
+    private @Nullable Integer private_gists;
+    private @Nullable Integer disk_usage;
     private @Nullable Integer collaborators;
     private @Nullable Plan plan;
 
@@ -57,44 +58,7 @@ public class User implements Data {
 
     @Override
     public String toString() {
-        return "User{" +
-                "login='" + login + '\'' +
-                ", id=" + id +
-                ", avatar_url='" + avatar_url + '\'' +
-                ", gravatar_id='" + gravatar_id + '\'' +
-                ", url='" + url + '\'' +
-                ", html_url='" + html_url + '\'' +
-                ", followers_url='" + followers_url + '\'' +
-                ", following_url='" + following_url + '\'' +
-                ", gists_url='" + gists_url + '\'' +
-                ", starred_url='" + starred_url + '\'' +
-                ", subscriptions_url='" + subscriptions_url + '\'' +
-                ", organizations_url='" + organizations_url + '\'' +
-                ", repos_url='" + repos_url + '\'' +
-                ", events_url='" + events_url + '\'' +
-                ", received_events_url='" + received_events_url + '\'' +
-                ", type='" + type + '\'' +
-                ", site_admin='" + site_admin + '\'' +
-                ", name='" + name + '\'' +
-                ", company='" + company + '\'' +
-                ", blog='" + blog + '\'' +
-                ", location='" + location + '\'' +
-                ", email='" + email + '\'' +
-                ", hireable='" + hireable + '\'' +
-                ", bio='" + bio + '\'' +
-                ", publicRepos=" + publicRepos +
-                ", publicGists='" + publicGists + '\'' +
-                ", followers=" + followers +
-                ", following=" + following +
-                ", createdAt='" + createdAt + '\'' +
-                ", updatedAt='" + updatedAt + '\'' +
-                ", totalPrivateRepos=" + totalPrivateRepos +
-                ", ownedPrivateRepos=" + ownedPrivateRepos +
-                ", privateGists=" + privateGists +
-                ", diskUsage=" + diskUsage +
-                ", collaborators=" + collaborators +
-                ", plan=" + plan +
-                '}';
+        return new Gson().toJson(this);
     }
 
     private static class Plan {
