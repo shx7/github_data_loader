@@ -51,6 +51,10 @@ public class User implements Data {
         return id;
     }
 
+    public String getLogin() {
+        return login;
+    }
+
     @Override
     public String toString() {
         return "User{" +
