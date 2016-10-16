@@ -63,26 +63,31 @@ class UserLoader extends DataLoader<User> {
     @Nullable
     @Override
     public List<User> loadPage(int id) {
-        List<User> result = new ArrayList<>();
-        User[] prefetchedUsers = loadData(User[].class, buildUsersPageRequestUrl(id));
-        if (prefetchedUsers != null) {
-            for (User user : prefetchedUsers) {
-                result.add(loadData(User.class, buildUserRequestUrl(user.getLogin())));
+        try {
+            List<User> result = new ArrayList<>();
+            User[] prefetchedUsers = loadData(User[].class, buildUsersPageRequestUrl(id));
+            if (prefetchedUsers != null) {
+                for (User user : prefetchedUsers) {
+                    result.add(loadData(User.class, buildUserRequestUrl(user.getLogin())));
+                }
             }
+            return result;
+        } catch (Throwable e) {
+            log.log(Level.SEVERE, "Error occured: " + e);
         }
-        return result;
+        return null;
     }
 
-    @NotNull
-    private <T> T loadData(@NotNull Class<T> type, @NotNull String request) {
+    @Nullable
+    private <T> T loadData(@NotNull Class<T> type, @NotNull String request) throws Throwable {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(getConnectionDataStream(request)))) {
             return gson.fromJson(reader.lines().collect(Collectors.joining()), type);
         } catch (Throwable e) {
             e.printStackTrace();
             log.log(Level.SEVERE, e.getMessage(), e.getLocalizedMessage());
+            throw e;
         }
-        return null;
     }
 
     @NotNull
@@ -91,12 +96,11 @@ class UserLoader extends DataLoader<User> {
         HttpsURLConnection connection = null;
         Map<String, List<String>> headerFields;
 
-        while (connection == null || (connection.getResponseCode() != 200)) {
+        while (connection == null || connection.getResponseCode() != 200) {
             URL url = new URL(currentRequestUrl + "/" + request);
             connection = (HttpsURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             headerFields = connection.getHeaderFields();
-
             // Handle error codes
             switch (connection.getResponseCode()) {
                 case 403:
@@ -104,7 +108,7 @@ class UserLoader extends DataLoader<User> {
                     break;
                 case 404:
                     log.log(Level.SEVERE, "404 Not found");
-                    break;
+                    return connection.getInputStream();
                 case 301:
                     globalRequestUrl = getUpdatedRequestUrl(headerFields, globalRequestUrl);
                     currentRequestUrl = globalRequestUrl;
@@ -127,8 +131,8 @@ class UserLoader extends DataLoader<User> {
 
     @NotNull
     private String buildUserRequestUrl(String login) {
-        return "user/" + login +
-                "&client_id=" + credentialsProvider.getClientId() +
+        return "users/" + login +
+                "?client_id=" + credentialsProvider.getClientId() +
                 "&client_secret=" + credentialsProvider.getClientSecret();
     }
 
@@ -143,14 +147,12 @@ class UserLoader extends DataLoader<User> {
     }
 
     private void processRateLimit(@NotNull Map<String, List<String>> headers) {
-        List<String> rateLimitRemaining = headers.get("X-RateLimit-Remaining");
-        if (rateLimitRemaining != null) {
-            long secondsToReset = Long.valueOf(rateLimitRemaining.get(0));
-            if (secondsToReset == 0) {
-                log.log(Level.WARNING, "Rate limit ended, current time " + LocalDateTime.now());
-                log.log(Level.WARNING, "Will wait until " + LocalDateTime.ofEpochSecond(secondsToReset, 0, ZoneOffset.UTC));
-                sleepUntilReset(secondsToReset);
-            }
+        long remainingRateLimit = Long.valueOf(headers.get("X-RateLimit-Remaining").get(0));
+        if (remainingRateLimit == 0) {
+            long secondsToReset = Long.valueOf(headers.get("X-RateLimit-Reset").get(0));
+            log.log(Level.WARNING, "Rate limit ended, current time " + LocalDateTime.now());
+            log.log(Level.WARNING, "Will wait until " + LocalDateTime.ofEpochSecond(secondsToReset, 0, ZoneOffset.UTC));
+            sleepUntilReset(secondsToReset);
         }
     }
 
