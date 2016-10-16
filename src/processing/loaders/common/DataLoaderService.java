@@ -1,4 +1,4 @@
-package processing.loaders;
+package processing.loaders.common;
 
 import com.sun.istack.internal.NotNull;
 import processing.data.Data;
@@ -9,7 +9,7 @@ import java.util.function.Consumer;
  * Abstract data loader service. Used to load
  * structured data (such as User, Repository, Organization info)
  * from github.com via calling corresponding api methods
- * @param <T extends Data> type of data to be loaded
+ * type of data to be loaded
  */
 
 public abstract class DataLoaderService <T extends Data> {

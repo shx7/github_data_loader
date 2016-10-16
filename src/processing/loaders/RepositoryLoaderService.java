@@ -2,6 +2,8 @@ package processing.loaders;
 
 import com.sun.istack.internal.NotNull;
 import processing.data.Repository;
+import processing.loaders.common.DataLoader;
+import processing.loaders.common.DataLoaderService;
 
 import java.util.function.Consumer;
 

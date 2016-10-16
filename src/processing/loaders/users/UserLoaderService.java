@@ -1,10 +1,12 @@
-package processing.loaders;
+package processing.loaders.users;
 
 import com.google.gson.Gson;
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
 import oauth.OAuthCredentialsProvider;
 import processing.data.User;
+import processing.loaders.common.DataLoader;
+import processing.loaders.common.DataLoaderService;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -16,6 +18,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class UserLoaderService extends DataLoaderService<User> {
     private static final Logger log = Logger.getLogger(UserLoaderService.class.getCanonicalName());
@@ -57,7 +60,7 @@ class UserLoader extends DataLoader<User> {
      */
     @Nullable
     @Override
-    protected List<User> loadPage(int id) {
+    public List<User> loadPage(int id) {
         List<User> result = new ArrayList<>();
         User[] prefetchedUsers = loadData(User[].class, buildUsersPageRequestUrl(id));
         if (prefetchedUsers != null) {
@@ -72,7 +75,7 @@ class UserLoader extends DataLoader<User> {
     private <T> T loadData(@NotNull Class<T> type, @NotNull String request) {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(getConnectionDataStream(request)))) {
-            return gson.fromJson(readAllData(reader), type);
+            return gson.fromJson(reader.lines().collect(Collectors.joining()), type);
         } catch (Throwable e) {
             e.printStackTrace();
             log.log(Level.SEVERE, e.getMessage(), e.getLocalizedMessage());
@@ -81,29 +84,18 @@ class UserLoader extends DataLoader<User> {
     }
 
     @NotNull
-    private String readAllData(@NotNull BufferedReader reader) throws IOException {
-        String currentLine;
-        StringBuilder result = new StringBuilder();
-        while ((currentLine = reader.readLine()) != null) {
-            result = result.append(currentLine);
-        }
-        return result.toString();
-    }
-
-    @NotNull
     private InputStream getConnectionDataStream(@NotNull String request) throws IOException {
         String currentRequestUrl = defaultRequestUrl;
         HttpsURLConnection connection = null;
-        Map<String, List<String>> headerFields = null;
+        Map<String, List<String>> headerFields;
 
-        while (!isRequestSucceeded(headerFields)) {
+        while (connection == null || (connection.getResponseCode() != 200)) {
             URL url = new URL(currentRequestUrl + "/" + request);
             connection = (HttpsURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             headerFields = connection.getHeaderFields();
             currentRequestUrl = getUpdatedRequestUrl(headerFields, currentRequestUrl);
         }
-
         return connection.getInputStream();
     }
 
@@ -119,16 +111,6 @@ class UserLoader extends DataLoader<User> {
         return "user/" + login +
                 "&client_id=" + credentialsProvider.getClientId() +
                 "&client_secret=" + credentialsProvider.getClientSecret();
-    }
-
-    private boolean isRequestSucceeded(@Nullable Map<String, List<String>> responseHeaders) {
-        if (responseHeaders != null) {
-            List<String> value = responseHeaders.get("Status");
-            if (value != null) {
-                if (value.contains("200 OK")) return true;
-            }
-        }
-        return false;
     }
 
     @NotNull

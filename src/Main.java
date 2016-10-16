@@ -1,6 +1,5 @@
-import cli.CommandLineOptionsParser;
 import oauth.OAuthCredentialsProvider;
-import processing.loaders.UserLoaderService;
+import processing.loaders.users.UserLoaderService;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package processing.loaders;
+package processing.loaders.common;
 
 import com.sun.istack.internal.NotNull;
 import processing.data.Data;
@@ -11,14 +11,14 @@ import java.util.List;
  *
  * @param <T>
  */
-abstract class DataLoader <T extends Data> {
+public abstract class DataLoader <T extends Data> {
     @NotNull
     protected T load(int id) {
         return null;
     }
 
     @NotNull
-    protected List<T> loadPage(int startIndex) {
+    public List<T> loadPage(int startIndex) {
         return null;
     }
 }
