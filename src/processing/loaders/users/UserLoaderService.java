@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -145,14 +146,14 @@ class UserLoader extends DataLoader<User> {
         if (remainingRateLimit == 0) {
             long secondsToReset = Long.valueOf(headers.get("X-RateLimit-Reset").get(0));
             log.log(Level.WARNING, "Rate limit ended, current time " + LocalDateTime.now());
-            log.log(Level.WARNING, "Will wait until " + LocalDateTime.ofEpochSecond(secondsToReset, 0, ZoneOffset.UTC));
+            log.log(Level.WARNING, "Will wait until " + LocalDateTime.ofEpochSecond(secondsToReset, 0, ZoneOffset.ofHours(3)));
             sleepUntilReset(secondsToReset);
         }
     }
 
     private void sleepUntilReset(long secondsToReset) {
-        while (LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(0)) <= secondsToReset) {
-            long secondsToWait = secondsToReset - LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(0));
+        while (Instant.now().toEpochMilli()/1000 <= secondsToReset) {
+            long secondsToWait = secondsToReset - Instant.now().toEpochMilli()/1000;
             try {
                 Thread.sleep(secondsToWait * 1000);
             } catch (InterruptedException ignored) {}
