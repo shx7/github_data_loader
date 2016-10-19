@@ -154,9 +154,12 @@ class UserLoader extends DataLoader<User> {
     private void sleepUntilReset(long secondsToReset) {
         while (Instant.now().toEpochMilli()/1000 <= secondsToReset) {
             long secondsToWait = secondsToReset - Instant.now().toEpochMilli()/1000;
-            try {
-                Thread.sleep(secondsToWait * 1000);
-            } catch (InterruptedException ignored) {}
+            if (secondsToWait > 0) {
+                try {
+                    Thread.sleep(secondsToWait * 1000);
+                } catch (InterruptedException ignored) {
+                }
+            }
         }
     }
 }

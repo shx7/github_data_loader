@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 
 public class FileUsersConsumer implements Consumer<User> {
     private static final Logger log = Logger.getLogger(FileUsersConsumer.class.getCanonicalName());
-    private static final long FLUSH_THRESHOLD = 200;
+    private static final long FLUSH_THRESHOLD = 500;
     private int startId = -1;
     private int endId = -1;
     private int count = 0;
@@ -44,6 +44,7 @@ public class FileUsersConsumer implements Consumer<User> {
             } catch (IOException e) {
                 log.log(Level.WARNING, "Failed to flush: " + e.getMessage());
                 log.log(Level.WARNING, e.getLocalizedMessage());
+                log.log(Level.WARNING, e.toString());
             }
         }
     }
