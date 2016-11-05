@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class UserLoaderService extends DataLoaderService<User> {
+    private static final int SKIP_USERS_COUNT = 100;
     private static final Logger log = Logger.getLogger(UserLoaderService.class.getCanonicalName());
 
     public UserLoaderService(@NotNull Consumer<User> dataProcessor,
@@ -33,6 +34,7 @@ public class UserLoaderService extends DataLoaderService<User> {
 
     @Override
     public void loadData(int startId, int endId) {
+        log.log(Level.INFO, "loadData(" + startId + ", " + endId + ")");
         for (int id = startId; id <= endId; ) {
             try {
                 List<User> users = dataLoader.loadPage(id);
@@ -40,9 +42,12 @@ public class UserLoaderService extends DataLoaderService<User> {
                 id = users.get(users.size() - 1).getId();
             } catch (IOException e) {
                 log.log(Level.WARNING, "Failed to get users from page since id = " + id);
+                log.log(Level.SEVERE, e.toString());
                 log.log(Level.SEVERE, e.getLocalizedMessage());
                 log.log(Level.SEVERE, e.getMessage());
                 log.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
+                startId += SKIP_USERS_COUNT;
+                log.log(Level.INFO, "Skipping " + SKIP_USERS_COUNT + " retry from id = " + startId);
             }
         }
     }
@@ -107,10 +112,12 @@ class UserLoader extends DataLoader<User> {
                 case 301:
                     globalRequestUrl = getUpdatedRequestUrl(headerFields, globalRequestUrl);
                     currentRequestUrl = globalRequestUrl;
+                    log.log(Level.INFO, "Permanent redirect to " + globalRequestUrl);
                     break;
                 case 302:
                 case 307:
                     currentRequestUrl = getUpdatedRequestUrl(headerFields, currentRequestUrl);
+                    log.log(Level.INFO, "Temporal redirect to " + currentRequestUrl);
                     break;
             }
         }

@@ -19,7 +19,7 @@ public class FileUsersConsumer implements Consumer<User> {
     private static final long FLUSH_THRESHOLD = 500;
     private int startId = -1;
     private int endId = -1;
-    private int count = 0;
+    private long consumedCount = 0;
     @NotNull private final List<User> data;
 
     public FileUsersConsumer() {
@@ -33,12 +33,12 @@ public class FileUsersConsumer implements Consumer<User> {
             startId = endId;
         }
         data.add(user);
-        ++count;
+        ++consumedCount;
         checkThreshold();
     }
 
     private void checkThreshold() {
-        if (count >= FLUSH_THRESHOLD) {
+        if (consumedCount >= FLUSH_THRESHOLD) {
             try {
                 flush();
             } catch (IOException e) {
@@ -55,8 +55,8 @@ public class FileUsersConsumer implements Consumer<User> {
             PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path));
             data.forEach(user -> writer.write(user.toString()));
             data.clear();
-            log.log(Level.INFO, "Flushed " + count + " users from " + startId + " to " + endId);
-            count = 0;
+            log.log(Level.INFO, "Flushed " + consumedCount + " users from " + startId + " to " + endId);
+            consumedCount = 0;
             startId = endId = -1;
         }
     }
