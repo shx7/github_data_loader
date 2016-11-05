@@ -8,12 +8,18 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 public class OAuthCredentialsProvider {
-    @NotNull private final String clientId;
-    @NotNull private final String clientSecret;
+    @NotNull private String credentialsFilename;
+    @NotNull private String clientId;
+    @NotNull private String clientSecret;
+    @NotNull private final Properties properties;
 
-    public OAuthCredentialsProvider(@NotNull String propertiesFilename) throws IOException {
-        Properties properties = new Properties();
-        properties.load(Files.newBufferedReader(Paths.get(propertiesFilename)));
+    public OAuthCredentialsProvider(@NotNull String propertiesFilename) {
+        credentialsFilename = propertiesFilename;
+        properties = new Properties();
+    }
+
+    public void loadConfiguration() throws IOException {
+        properties.load(Files.newBufferedReader(Paths.get(credentialsFilename)));
         clientId = properties.getProperty("CLIENT_ID");
         clientSecret = properties.getProperty("CLIENT_SECRET");
     }

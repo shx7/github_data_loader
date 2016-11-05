@@ -6,8 +6,14 @@ import processing.loaders.users.UserLoaderService;
 import java.io.IOException;
 
 public class Main {
-    private static final UsersRange usersRange = new UsersRange();
+    private static final UsersRange usersRange;
+    private static final OAuthCredentialsProvider credentialsProvider;
     private static final FileUsersConsumer usersConsumer = new FileUsersConsumer();
+
+    static {
+        usersRange = new UsersRange("users_range.properties");
+        credentialsProvider = new OAuthCredentialsProvider("oauth.properties");
+    }
 
     public static void main(String[] args) throws IOException {
         loadConfiguration();
@@ -16,7 +22,6 @@ public class Main {
     }
 
     private static void startProcessing() throws IOException {
-        OAuthCredentialsProvider credentialsProvider = new OAuthCredentialsProvider("oauth.prop");
         new UserLoaderService(usersConsumer, credentialsProvider).loadData(usersRange.getStartId(), usersRange.getEndId());
         usersConsumer.flush();
     }
@@ -36,5 +41,6 @@ public class Main {
 
     private static void loadConfiguration() throws IOException {
         usersRange.loadRange();
+        credentialsProvider.loadConfiguration();
     }
 }
