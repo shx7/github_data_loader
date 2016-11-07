@@ -1,7 +1,9 @@
 package processing.loaders.users;
 
+import com.google.gson.Gson;
 import com.sun.istack.internal.NotNull;
 import fs.FileUtil;
+import fs.UsersRange;
 import processing.data.User;
 
 import java.io.IOException;
@@ -21,9 +23,11 @@ public class FileUsersConsumer implements Consumer<User> {
     private int endId = -1;
     private long consumedCount = 0;
     @NotNull private final List<User> data;
+    @NotNull private final UsersRange usersRange;
 
-    public FileUsersConsumer() {
+    public FileUsersConsumer(@NotNull UsersRange usersRange) {
         data = new ArrayList<>();
+        this.usersRange = usersRange;
     }
 
     @Override
@@ -53,8 +57,10 @@ public class FileUsersConsumer implements Consumer<User> {
         if (startId > 0) {
             Path path = FileUtil.getUsersFile(startId, endId);
             PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path));
-            data.forEach(user -> writer.write(user.toString()));
+            writer.write(new Gson().toJson(data.toArray(), User[].class));
+            writer.flush();
             data.clear();
+            usersRange.updateStartId(endId + 1);
             log.log(Level.INFO, "Flushed " + consumedCount + " users from " + startId + " to " + endId);
             consumedCount = 0;
             startId = endId = -1;

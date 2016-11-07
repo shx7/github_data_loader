@@ -152,8 +152,9 @@ class UserLoader extends DataLoader<User> {
         long remainingRateLimit = Long.valueOf(headers.get("X-RateLimit-Remaining").get(0));
         if (remainingRateLimit == 0) {
             long secondsToReset = Long.valueOf(headers.get("X-RateLimit-Reset").get(0));
-            log.log(Level.WARNING, "Rate limit ended, current time " + LocalDateTime.now());
-            log.log(Level.WARNING, "Will wait until " + LocalDateTime.ofEpochSecond(secondsToReset, 0, ZoneOffset.ofHours(3)));
+            String errorMessage = "Rate limit ended, current time " + LocalDateTime.now() + "\n" +
+                    "Will wait until " + LocalDateTime.ofEpochSecond(secondsToReset, 0, ZoneOffset.ofHours(3)).toLocalTime();
+            log.log(Level.WARNING, errorMessage);
             sleepUntilReset(secondsToReset);
         }
     }

@@ -29,6 +29,9 @@ public class UsersRange {
     public void updateStartId(int value) {
         startId = value;
         rangeProperties.setProperty(START_ID, String.valueOf(startId));
+        try {
+            rangeProperties.store(Files.newOutputStream(Paths.get(usersRangeFilename)), "");
+        } catch (IOException ignored) {}
     }
 
     public void updateEndId(int value) {
