@@ -1,4 +1,4 @@
-import fs.UsersRange;
+import fs.DataRangeProperties;
 import oauth.OAuthCredentialsProvider;
 import processing.loaders.users.FileUsersConsumer;
 import processing.loaders.users.UserLoaderService;
@@ -6,12 +6,12 @@ import processing.loaders.users.UserLoaderService;
 import java.io.IOException;
 
 public class Main {
-    private static final UsersRange usersRange;
+    private static final DataRangeProperties usersRange;
     private static final OAuthCredentialsProvider credentialsProvider;
     private static final FileUsersConsumer usersConsumer;
 
     static {
-        usersRange = new UsersRange("users_range.properties");
+        usersRange = new DataRangeProperties("users_range.properties");
         credentialsProvider = new OAuthCredentialsProvider("oauth.properties");
         usersConsumer = new FileUsersConsumer(usersRange);
     }

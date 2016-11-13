@@ -7,7 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-public class UsersRange {
+public class DataRangeProperties {
     @NotNull private static final String START_ID = "START_ID";
     @NotNull private static final String END_ID = "END_ID";
     @NotNull private Properties rangeProperties;
@@ -15,7 +15,7 @@ public class UsersRange {
     private int startId;
     private int endId;
 
-    public UsersRange(@NotNull String filename) {
+    public DataRangeProperties(@NotNull String filename) {
         usersRangeFilename = filename;
         rangeProperties = new Properties();
     }

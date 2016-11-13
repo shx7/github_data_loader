@@ -3,7 +3,7 @@ package processing.loaders.users;
 import com.google.gson.Gson;
 import com.sun.istack.internal.NotNull;
 import fs.FileUtil;
-import fs.UsersRange;
+import fs.DataRangeProperties;
 import processing.data.User;
 
 import java.io.IOException;
@@ -23,9 +23,9 @@ public class FileUsersConsumer implements Consumer<User> {
     private int endId = -1;
     private long consumedCount = 0;
     @NotNull private final List<User> data;
-    @NotNull private final UsersRange usersRange;
+    @NotNull private final DataRangeProperties usersRange;
 
-    public FileUsersConsumer(@NotNull UsersRange usersRange) {
+    public FileUsersConsumer(@NotNull DataRangeProperties usersRange) {
         data = new ArrayList<>();
         this.usersRange = usersRange;
     }

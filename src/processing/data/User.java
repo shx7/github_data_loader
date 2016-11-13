@@ -61,6 +61,11 @@ public class User implements Data {
         return new Gson().toJson(this);
     }
 
+    @NotNull
+    public String getReposUrl() {
+        return repos_url;
+    }
+
     private static class Plan {
         private @NotNull String name;
         private int space;
