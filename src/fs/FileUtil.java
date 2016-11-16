@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class FileUtil {
     private static final String USERS_DEFAULT_DIRECTORY = "users";
     private static String usersDirectory = USERS_DEFAULT_DIRECTORY;
+    private static final String REPOSITORIES_DEFAULT_DIRECTORY = "repos";
 
     public static void setUsersDirectory(@NotNull String path) {
         usersDirectory = path;
@@ -34,5 +35,9 @@ public class FileUtil {
             return Files.createFile(path);
         }
         return path;
+    }
+
+    public static Path getNextRepositoryFile(@NotNull String suffix, int index) {
+        return Paths.get(REPOSITORIES_DEFAULT_DIRECTORY + "/repositories-" + index + suffix);
     }
 }

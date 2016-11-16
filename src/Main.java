@@ -1,9 +1,11 @@
+import com.google.common.io.Files;
 import fs.DataRangeProperties;
 import oauth.OAuthCredentialsProvider;
+import processing.loaders.repos.ReposLoaderService;
 import processing.loaders.users.FileUsersConsumer;
-import processing.loaders.users.UserLoaderService;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 
 public class Main {
     private static final DataRangeProperties usersRange;
@@ -23,8 +25,16 @@ public class Main {
     }
 
     private static void startProcessing() throws IOException {
-        new UserLoaderService(usersConsumer, credentialsProvider).loadData(usersRange.getStartId(), usersRange.getEndId());
-        usersConsumer.flush();
+//        new UserLoaderService(usersConsumer, credentialsProvider).loadData(usersRange.getStartId(), usersRange.getEndId());
+//        usersConsumer.flush();
+        ReposLoaderService reposLoaderService = new ReposLoaderService(credentialsProvider);
+        Files.fileTreeTraverser().children(Paths.get("users").toFile()).forEach(file -> {
+            try {
+                reposLoaderService.processUsersFile(file.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private static void initSignalsHandlers() {

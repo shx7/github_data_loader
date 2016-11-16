@@ -3,6 +3,7 @@ package processing.loaders.users;
 import com.sun.istack.internal.NotNull;
 import oauth.OAuthCredentialsProvider;
 import processing.data.User;
+import processing.loaders.common.DataLoader;
 import processing.loaders.common.DataLoaderService;
 
 import java.io.IOException;
@@ -12,16 +13,18 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class UserLoaderService extends DataLoaderService<User> {
+public class UserLoaderService implements DataLoaderService<User> {
     private static final int SKIP_USERS_COUNT = 100;
     private static final Logger log = Logger.getLogger(UserLoaderService.class.getCanonicalName());
+    private final Consumer<User> dataProcessor;
+    private final DataLoader<User> dataLoader;
 
     public UserLoaderService(@NotNull Consumer<User> dataProcessor,
                              @NotNull OAuthCredentialsProvider credentialsProvider) {
-        super(dataProcessor, new UserLoader(credentialsProvider));
+        this.dataProcessor = dataProcessor;
+        this.dataLoader = new UserLoader(credentialsProvider);
     }
 
-    @Override
     public void loadData(int startId, int endId) {
         log.log(Level.INFO, "loadData(" + startId + ", " + endId + ")");
         for (int id = startId; id <= endId; ) {
