@@ -30,7 +30,7 @@ public class Main {
         ReposLoaderService reposLoaderService = new ReposLoaderService(credentialsProvider);
         Files.fileTreeTraverser().children(Paths.get("users").toFile()).forEach(file -> {
             try {
-                reposLoaderService.processUsersFile(file.toString());
+                reposLoaderService.processUsersFile(file);
             } catch (IOException e) {
                 e.printStackTrace();
             }

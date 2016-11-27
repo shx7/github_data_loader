@@ -51,7 +51,7 @@ class FileReposConsumer implements Consumer<Repository> {
     private void flush() throws IOException {
         Path path = FileUtil.getNextRepositoryFile(fileNameSuffix, reposFlushIndex);
         if (Files.exists(path)) {
-            throw new IOException("Flush failed to file " + path.toAbsolutePath());
+            log.log(Level.WARNING, "Flush to file " + path.toAbsolutePath() + " rewriting");
         }
         PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path));
         writer.write(new Gson().toJson(data.toArray(), Repository[].class));
